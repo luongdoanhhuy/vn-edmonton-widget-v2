@@ -10,9 +10,9 @@ object LunarCalendar {
 
     data class LunarDate(val day: Int, val month: Int, val year: Int, val leap: Boolean) {
         fun formatShort(): String {
-            val leapStr = if (leap) " nhuận" else ""
+            val leapStr = if (leap) "N" else ""
             val yearCanChi = "${CAN[(year + 6) % 10]} ${CHI[(year + 8) % 12]}"
-            return "🌙 %02d/%02d%s ÂL (%s)".format(day, month, leapStr, yearCanChi)
+            return "🌙 %02d/%02d%s ÂL • %s".format(day, month, leapStr, yearCanChi)
         }
     }
 

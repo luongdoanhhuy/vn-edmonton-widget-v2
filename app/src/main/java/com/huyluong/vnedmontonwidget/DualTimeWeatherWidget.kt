@@ -17,6 +17,7 @@ import org.json.JSONObject
 import java.net.URL
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 class DualTimeWeatherWidget : AppWidgetProvider() {
 
@@ -37,7 +38,20 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
     }
 
     companion object {
+        const val PREFS_NAME = "ios_glass_prefs"
+        const val KEY_TRANSPARENCY = "transparency_pct" // 0 = solid, 100 = ultra transparent
+
         data class WeatherInfo(val temp: Int, val code: Int, val humidity: Int, val wind: Int)
+
+        fun getSavedTransparency(context: Context): Int {
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getInt(KEY_TRANSPARENCY, 70)
+        }
+
+        fun saveTransparency(context: Context, pct: Int) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit().putInt(KEY_TRANSPARENCY, pct).apply()
+        }
 
         fun updateAllWidgets(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
@@ -74,38 +88,64 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
             val isTall = heightDp >= 180
 
             val clockSize = when {
-                isCompact -> 20f
-                isTall -> 34f
-                else -> 27f
+                isCompact -> 24f
+                isTall -> 40f
+                else -> 33f
             }
-            val metaSize = if (isCompact) 9.5f else if (isTall) 12.5f else 11f
+            val tempSize = when {
+                isCompact -> 15f
+                isTall -> 23f
+                else -> 19f
+            }
+            val metaSize = if (isCompact) 9.5f else if (isTall) 12f else 10.5f
 
             views.setTextViewTextSize(R.id.clock_vn, TypedValue.COMPLEX_UNIT_SP, clockSize)
             views.setTextViewTextSize(R.id.clock_edm, TypedValue.COMPLEX_UNIT_SP, clockSize)
+            views.setTextViewTextSize(R.id.tv_vn_temp, TypedValue.COMPLEX_UNIT_SP, tempSize)
+            views.setTextViewTextSize(R.id.tv_edm_temp, TypedValue.COMPLEX_UNIT_SP, tempSize)
             views.setTextViewTextSize(R.id.tv_vn_solar, TypedValue.COMPLEX_UNIT_SP, metaSize)
             views.setTextViewTextSize(R.id.tv_edm_solar, TypedValue.COMPLEX_UNIT_SP, metaSize)
-            views.setTextViewTextSize(R.id.tv_vn_lunar, TypedValue.COMPLEX_UNIT_SP, metaSize)
-            views.setTextViewTextSize(R.id.tv_edm_lunar, TypedValue.COMPLEX_UNIT_SP, metaSize)
 
             val descVisibility = if (heightDp < 105) View.GONE else View.VISIBLE
             views.setViewVisibility(R.id.tv_vn_weather_desc, descVisibility)
             views.setViewVisibility(R.id.tv_edm_weather_desc, descVisibility)
+            views.setViewVisibility(R.id.tv_vn_offset, descVisibility)
+            views.setViewVisibility(R.id.tv_edm_offset, descVisibility)
 
             val vnNow = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
+            val edmNow = ZonedDateTime.now(ZoneId.of("America/Edmonton"))
+
+            // Calculate exact hour difference (handles DST automatically: -13h or -14h)
+            val diffHours = ChronoUnit.HOURS.between(vnNow.toLocalDateTime(), edmNow.toLocalDateTime())
+            val edmDayLabel = when {
+                edmNow.toLocalDate().isBefore(vnNow.toLocalDate()) -> "Hôm qua"
+                edmNow.toLocalDate().isAfter(vnNow.toLocalDate()) -> "Ngày mai"
+                else -> "Hôm nay"
+            }
+
+            // Vietnam Panel
             val vnLunar = LunarCalendar.convertSolar2Lunar(vnNow.dayOfMonth, vnNow.monthValue, vnNow.year, 7.0)
+            views.setTextViewText(R.id.tv_vn_offset, "Hôm nay • +${-diffHours}g")
             views.setTextViewText(R.id.tv_vn_solar, formatSolarDate(vnNow))
             views.setTextViewText(R.id.tv_vn_lunar, vnLunar.formatShort())
-            views.setTextViewText(R.id.tv_vn_temp, "${weatherEmoji(vnWeather.code, vnNow.hour)} ${vnWeather.temp}°C")
+            views.setTextViewText(R.id.tv_vn_temp, "${weatherEmoji(vnWeather.code, vnNow.hour)} ${vnWeather.temp}°")
             views.setTextViewText(R.id.tv_vn_weather_desc, "${weatherLabel(vnWeather.code)} • Ẩm ${vnWeather.humidity}%")
-            views.setInt(R.id.panel_vn, "setBackgroundResource", pickBackground(vnWeather.code, vnNow.hour))
+            views.setInt(R.id.panel_vn, "setBackgroundResource", pickIosBackground(vnWeather.code, vnNow.hour))
 
-            val edmNow = ZonedDateTime.now(ZoneId.of("America/Edmonton"))
+            // Edmonton Panel
             val edmLunar = LunarCalendar.convertSolar2Lunar(edmNow.dayOfMonth, edmNow.monthValue, edmNow.year, 7.0)
+            views.setTextViewText(R.id.tv_edm_offset, "$edmDayLabel • ${diffHours}g")
             views.setTextViewText(R.id.tv_edm_solar, formatSolarDate(edmNow))
             views.setTextViewText(R.id.tv_edm_lunar, edmLunar.formatShort())
-            views.setTextViewText(R.id.tv_edm_temp, "${weatherEmoji(edmWeather.code, edmNow.hour)} ${edmWeather.temp}°C")
+            views.setTextViewText(R.id.tv_edm_temp, "${weatherEmoji(edmWeather.code, edmNow.hour)} ${edmWeather.temp}°")
             views.setTextViewText(R.id.tv_edm_weather_desc, "${weatherLabel(edmWeather.code)} • Gió ${edmWeather.wind}km/h")
-            views.setInt(R.id.panel_edm, "setBackgroundResource", pickBackground(edmWeather.code, edmNow.hour))
+            views.setInt(R.id.panel_edm, "setBackgroundResource", pickIosBackground(edmWeather.code, edmNow.hour))
+
+            // Apply user transparency preference
+            val transparencyPct = getSavedTransparency(context)
+            // Higher transparencyPct => lower drawable alpha (from 255 down to 55)
+            val drawableAlpha = (255 - (transparencyPct * 1.9)).toInt().coerceIn(55, 255)
+            views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.bg_ios_glass_shell)
 
             val intent = Intent(context, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(
@@ -129,13 +169,13 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
             return "%s, %02d/%02d/%d".format(dow, zdt.dayOfMonth, zdt.monthValue, zdt.year)
         }
 
-        private fun pickBackground(code: Int, hour: Int): Int {
+        fun pickIosBackground(code: Int, hour: Int): Int {
             return when {
-                code in listOf(71, 73, 75, 77, 85, 86) -> R.drawable.bg_snow
-                code in listOf(51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99) -> R.drawable.bg_rain
-                hour in 17..18 -> R.drawable.bg_sunset
-                hour >= 19 || hour < 6 -> R.drawable.bg_night_clear
-                else -> R.drawable.bg_day_clear
+                code in listOf(71, 73, 75, 77, 85, 86) -> R.drawable.bg_ios_snow
+                code in listOf(51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99) -> R.drawable.bg_ios_rain
+                hour in 17..18 -> R.drawable.bg_ios_sunset
+                hour >= 19 || hour < 6 -> R.drawable.bg_ios_night
+                else -> R.drawable.bg_ios_day
             }
         }
 

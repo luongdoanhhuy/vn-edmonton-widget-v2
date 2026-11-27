@@ -1,57 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B0F19"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@drawable/bg_ios_wallpaper"
+    android:fillViewport="true">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Việt Nam ⇄ Edmonton"
-        android:textColor="#FFFFFF"
-        android:textSize="22sp"
-        android:textStyle="bold" />
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Đồng hồ kép • Lịch Âm &amp; Dương • Thời tiết tự động"
-        android:textColor="#94A3B8"
-        android:textSize="13sp"
-        android:layout_marginBottom="16dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Việt Nam ⇄ Edmonton"
+            android:fontFamily="sans-serif-light"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp" />
 
-    <include
-        android:id="@+id/preview_widget"
-        layout="@layout/widget_dual_clock"
-        android:layout_width="match_parent"
-        android:layout_height="220dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Giao diện Kính Mờ iOS • Lịch Âm &amp; Dương • Thời tiết động"
+            android:textColor="#B3FFFFFF"
+            android:textSize="13sp"
+            android:layout_marginBottom="18dp" />
 
-    <Button
-        android:id="@+id/btn_pin_widget"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginTop="20dp"
-        android:text="➕ Thêm Widget ra Màn Hình Chính"
-        android:textStyle="bold"
-        android:backgroundTint="#2563EB"
-        android:textColor="#FFFFFF" />
+        <!-- Live iOS Glass Widget Preview -->
+        <include
+            android:id="@+id/preview_widget"
+            layout="@layout/widget_dual_clock"
+            android:layout_width="match_parent"
+            android:layout_height="205dp" />
 
-    <Button
-        android:id="@+id/btn_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginTop="10dp"
-        android:text="🔄 Cập nhật Thời tiết &amp; Lịch ngay"
-        android:backgroundTint="#1E293B"
-        android:textColor="#E2E8F0" />
+        <!-- Glass Opacity / Transparency Control Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_ios_glass_shell"
+            android:orientation="vertical"
+            android:padding="14dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Mẹo: Sau khi thêm Widget ra màn hình chính, nhấn giữ vào Widget để kéo thay đổi kích thước ngang/dọc tùy ý."
-        android:textColor="#64748B"
-        android:textSize="12sp" />
-</LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Độ trong suốt nền Widget"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_alpha_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="70% Trong suốt"
+                    android:textColor="#93C5FD"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/seek_alpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:max="100"
+                android:progress="70" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Kéo sang phải để Widget xuyên thấu hình nền nhiều hơn; kéo sang trái để đậm màu dễ đọc."
+                android:textColor="#B3FFFFFF"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_pin_widget"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:text="➕ Thêm Widget iOS ra Màn Hình Chính"
+            android:textStyle="bold"
+            android:backgroundTint="#38BDF8"
+            android:textColor="#0F172A" />
+
+        <Button
+            android:id="@+id/btn_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="🔄 Cập nhật Thời tiết &amp; Áp dụng độ trong suốt"
+            android:backgroundTint="#33FFFFFF"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+</ScrollView>

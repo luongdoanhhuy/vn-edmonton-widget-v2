@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,12 +24,33 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val seekAlpha = findViewById<SeekBar>(R.id.seek_alpha)
+        val tvAlpha = findViewById<TextView>(R.id.tv_alpha_value)
+        val savedPct = DualTimeWeatherWidget.getSavedTransparency(this)
+
+        seekAlpha.progress = savedPct
+        tvAlpha.text = "$savedPct% Trong suốt"
+        applyPreviewTransparency(savedPct)
+
+        seekAlpha.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                tvAlpha.text = "$progress% Trong suốt"
+                applyPreviewTransparency(progress)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                val pct = seekBar?.progress ?: 70
+                DualTimeWeatherWidget.saveTransparency(this@MainActivity, pct)
+                DualTimeWeatherWidget.updateAllWidgets(this@MainActivity)
+            }
+        })
+
         refreshPreview()
 
         findViewById<Button>(R.id.btn_refresh).setOnClickListener {
             refreshPreview()
             DualTimeWeatherWidget.updateAllWidgets(this)
-            Toast.makeText(this, "Đã cập nhật thời tiết & lịch!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Đã cập nhật giao diện iOS Glass!", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.btn_pin_widget).setOnClickListener {
@@ -37,10 +60,17 @@ class MainActivity : AppCompatActivity() {
                 if (appWidgetManager.isRequestPinAppWidgetSupported) {
                     appWidgetManager.requestPinAppWidget(myProvider, null, null)
                 } else {
-                    Toast.makeText(this, "Vui lòng thêm Widget từ màn hình chính điện thoại.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Nhấn giữ màn hình chính -> Tiện ích -> VN - Edmonton.", Toast.LENGTH_LONG).show()
                 }
             }
         }
+    }
+
+    private fun applyPreviewTransparency(pct: Int) {
+        val alphaFloat = (1.0f - (pct / 100f) * 0.55f).coerceIn(0.45f, 1.0f)
+        findViewById<LinearLayout>(R.id.panel_vn).background?.alpha = (alphaFloat * 255).toInt()
+        findViewById<LinearLayout>(R.id.panel_edm).background?.alpha = (alphaFloat * 255).toInt()
+        findViewById<LinearLayout>(R.id.widget_root).background?.alpha = (alphaFloat * 255).toInt()
     }
 
     private fun refreshPreview() {
@@ -50,24 +80,31 @@ class MainActivity : AppCompatActivity() {
 
             withContext(Dispatchers.Main) {
                 val vnNow = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
+                val edmNow = ZonedDateTime.now(ZoneId.of("America/Edmonton"))
+                val diffHours = ChronoUnit.HOURS.between(vnNow.toLocalDateTime(), edmNow.toLocalDateTime())
+
                 val vnLunar = LunarCalendar.convertSolar2Lunar(vnNow.dayOfMonth, vnNow.monthValue, vnNow.year, 7.0)
+                findViewById<TextView>(R.id.tv_vn_offset).text = "Hôm nay • +${-diffHours}g"
                 findViewById<TextView>(R.id.tv_vn_solar).text = "%02d/%02d/%d".format(vnNow.dayOfMonth, vnNow.monthValue, vnNow.year)
                 findViewById<TextView>(R.id.tv_vn_lunar).text = vnLunar.formatShort()
-                findViewById<TextView>(R.id.tv_vn_temp).text = "${vnW.temp}°C"
-                findViewById<TextView>(R.id.tv_vn_weather_desc).text = "Độ ẩm ${vnW.humidity}% • Gió ${vnW.wind}km/h"
+                findViewById<TextView>(R.id.tv_vn_temp).text = "${vnW.temp}°"
+                findViewById<TextView>(R.id.tv_vn_weather_desc).text = "Ẩm ${vnW.humidity}% • Gió ${vnW.wind}km/h"
                 findViewById<LinearLayout>(R.id.panel_vn).setBackgroundResource(
-                    if (vnNow.hour in 6..18) R.drawable.bg_day_clear else R.drawable.bg_night_clear
+                    DualTimeWeatherWidget.pickIosBackground(vnW.code, vnNow.hour)
                 )
 
-                val edmNow = ZonedDateTime.now(ZoneId.of("America/Edmonton"))
+                val edmDayLabel = if (edmNow.toLocalDate().isBefore(vnNow.toLocalDate())) "Hôm qua" else "Hôm nay"
                 val edmLunar = LunarCalendar.convertSolar2Lunar(edmNow.dayOfMonth, edmNow.monthValue, edmNow.year, 7.0)
+                findViewById<TextView>(R.id.tv_edm_offset).text = "$edmDayLabel • ${diffHours}g"
                 findViewById<TextView>(R.id.tv_edm_solar).text = "%02d/%02d/%d".format(edmNow.dayOfMonth, edmNow.monthValue, edmNow.year)
                 findViewById<TextView>(R.id.tv_edm_lunar).text = edmLunar.formatShort()
-                findViewById<TextView>(R.id.tv_edm_temp).text = "${edmW.temp}°C"
-                findViewById<TextView>(R.id.tv_edm_weather_desc).text = "Độ ẩm ${edmW.humidity}% • Gió ${edmW.wind}km/h"
+                findViewById<TextView>(R.id.tv_edm_temp).text = "${edmW.temp}°"
+                findViewById<TextView>(R.id.tv_edm_weather_desc).text = "Ẩm ${edmW.humidity}% • Gió ${edmW.wind}km/h"
                 findViewById<LinearLayout>(R.id.panel_edm).setBackgroundResource(
-                    if (edmNow.hour in 6..18) R.drawable.bg_day_clear else R.drawable.bg_night_clear
+                    DualTimeWeatherWidget.pickIosBackground(edmW.code, edmNow.hour)
                 )
+
+                applyPreviewTransparency(DualTimeWeatherWidget.getSavedTransparency(this@MainActivity))
             }
         }
     }
