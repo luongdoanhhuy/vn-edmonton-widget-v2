@@ -14,16 +14,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.net.HttpURLConnection
 import java.net.URL
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 class DualTimeWeatherWidget : AppWidgetProvider() {
 
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WeatherSyncWorker.schedule(context)
+        syncAndUpdateAll(context)
+    }
+
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        WeatherSyncWorker.schedule(context)
         for (id in appWidgetIds) {
-            updateWidget(context, appWidgetManager, id)
+            updateWidget(context, appWidgetManager, id, forceFetch = true)
         }
     }
 
@@ -34,45 +43,116 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
         newOptions: Bundle
     ) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
-        updateWidget(context, appWidgetManager, appWidgetId)
+        updateWidget(context, appWidgetManager, appWidgetId, forceFetch = false)
     }
 
     companion object {
         const val PREFS_NAME = "ios_glass_prefs"
-        const val KEY_TRANSPARENCY = "transparency_pct" // 0 = solid, 100 = ultra transparent
+        const val KEY_TRANSPARENCY = "transparency_pct"
 
-        data class WeatherInfo(val temp: Int, val code: Int, val humidity: Int, val wind: Int)
+        private const val KEY_VN_TEMP = "vn_temp"
+        private const val KEY_VN_CODE = "vn_code"
+        private const val KEY_VN_HUM = "vn_hum"
+        private const val KEY_VN_WIND = "vn_wind"
+
+        private const val KEY_EDM_TEMP = "edm_temp"
+        private const val KEY_EDM_CODE = "edm_code"
+        private const val KEY_EDM_HUM = "edm_hum"
+        private const val KEY_EDM_WIND = "edm_wind"
+        private const val KEY_LAST_SYNC = "last_sync_str"
+
+        data class WeatherInfo(val temp: Int, val code: Int, val humidity: Int, val wind: Int, val isLive: Boolean)
 
         fun getSavedTransparency(context: Context): Int {
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                .getInt(KEY_TRANSPARENCY, 70)
+                .getInt(KEY_TRANSPARENCY, 60)
         }
 
         fun saveTransparency(context: Context, pct: Int) {
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                .edit().putInt(KEY_TRANSPARENCY, pct).apply()
+                .edit().putInt(KEY_TRANSPARENCY, pct.coerceIn(0, 100)).apply()
         }
 
-        fun updateAllWidgets(context: Context) {
+        fun getCachedWeather(context: Context): Pair<WeatherInfo, WeatherInfo> {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val vn = WeatherInfo(
+                temp = prefs.getInt(KEY_VN_TEMP, 29),
+                code = prefs.getInt(KEY_VN_CODE, 1),
+                humidity = prefs.getInt(KEY_VN_HUM, 70),
+                wind = prefs.getInt(KEY_VN_WIND, 8),
+                isLive = prefs.contains(KEY_VN_TEMP)
+            )
+            val edm = WeatherInfo(
+                temp = prefs.getInt(KEY_EDM_TEMP, -5),
+                code = prefs.getInt(KEY_EDM_CODE, 71),
+                humidity = prefs.getInt(KEY_EDM_HUM, 80),
+                wind = prefs.getInt(KEY_EDM_WIND, 14),
+                isLive = prefs.contains(KEY_EDM_TEMP)
+            )
+            return Pair(vn, edm)
+        }
+
+        fun saveWeatherCache(context: Context, vn: WeatherInfo, edm: WeatherInfo) {
+            val nowVn = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
+                .format(DateTimeFormatter.ofPattern("HH:mm dd/MM"))
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+                .putInt(KEY_VN_TEMP, vn.temp)
+                .putInt(KEY_VN_CODE, vn.code)
+                .putInt(KEY_VN_HUM, vn.humidity)
+                .putInt(KEY_VN_WIND, vn.wind)
+                .putInt(KEY_EDM_TEMP, edm.temp)
+                .putInt(KEY_EDM_CODE, edm.code)
+                .putInt(KEY_EDM_HUM, edm.humidity)
+                .putInt(KEY_EDM_WIND, edm.wind)
+                .putString(KEY_LAST_SYNC, nowVn)
+                .apply()
+        }
+
+        fun getLastSyncText(context: Context): String {
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_LAST_SYNC, "Chưa đồng bộ") ?: "Chưa đồng bộ"
+        }
+
+        fun syncAndUpdateAll(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
             val ids = manager.getAppWidgetIds(ComponentName(context, DualTimeWeatherWidget::class.java))
-            for (id in ids) {
-                updateWidget(context, manager, id)
+            CoroutineScope(Dispatchers.IO).launch {
+                val (vnLive, edmLive) = fetchBothLive(context)
+                for (id in ids) {
+                    val options = manager.getAppWidgetOptions(id)
+                    val w = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 280)
+                    val h = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 130)
+                    val views = buildRemoteViews(context, w, h, vnLive, edmLive)
+                    manager.updateAppWidget(id, views)
+                }
             }
         }
 
-        fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
+        fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int, forceFetch: Boolean) {
             val options = manager.getAppWidgetOptions(widgetId)
             val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 280)
             val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 130)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                val vnWeather = fetchWeather(10.8231, 106.6297)
-                val edmWeather = fetchWeather(53.5461, -113.4938)
+            val (cachedVn, cachedEdm) = getCachedWeather(context)
+            manager.updateAppWidget(widgetId, buildRemoteViews(context, minWidth, minHeight, cachedVn, cachedEdm))
 
-                val views = buildRemoteViews(context, minWidth, minHeight, vnWeather, edmWeather)
-                manager.updateAppWidget(widgetId, views)
+            if (forceFetch) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val (vnLive, edmLive) = fetchBothLive(context)
+                    val views = buildRemoteViews(context, minWidth, minHeight, vnLive, edmLive)
+                    manager.updateAppWidget(widgetId, views)
+                }
             }
+        }
+
+        suspend fun fetchBothLive(context: Context): Pair<WeatherInfo, WeatherInfo> {
+            val (cachedVn, cachedEdm) = getCachedWeather(context)
+            val vn = fetchWeather(10.8231, 106.6297, cachedVn)
+            val edm = fetchWeather(53.5461, -113.4938, cachedEdm)
+            if (vn.isLive || edm.isLive) {
+                saveWeatherCache(context, vn, edm)
+            }
+            return Pair(vn, edm)
         }
 
         fun buildRemoteViews(
@@ -114,8 +194,6 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
 
             val vnNow = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
             val edmNow = ZonedDateTime.now(ZoneId.of("America/Edmonton"))
-
-            // Calculate exact hour difference (handles DST automatically: -13h or -14h)
             val diffHours = ChronoUnit.HOURS.between(vnNow.toLocalDateTime(), edmNow.toLocalDateTime())
             val edmDayLabel = when {
                 edmNow.toLocalDate().isBefore(vnNow.toLocalDate()) -> "Hôm qua"
@@ -123,7 +201,13 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
                 else -> "Hôm nay"
             }
 
-            // Vietnam Panel
+            val transparencyPct = getSavedTransparency(context)
+            val panelAlpha = (255 - (transparencyPct * 2.17f)).toInt().coerceIn(38, 255)
+            val shellAlpha = (panelAlpha * 0.65f).toInt().coerceIn(24, 180)
+
+            views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.bg_ios_glass_shell)
+            views.setInt(R.id.widget_root, "setAlpha", shellAlpha)
+
             val vnLunar = LunarCalendar.convertSolar2Lunar(vnNow.dayOfMonth, vnNow.monthValue, vnNow.year, 7.0)
             views.setTextViewText(R.id.tv_vn_offset, "Hôm nay • +${-diffHours}g")
             views.setTextViewText(R.id.tv_vn_solar, formatSolarDate(vnNow))
@@ -131,8 +215,8 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.tv_vn_temp, "${weatherEmoji(vnWeather.code, vnNow.hour)} ${vnWeather.temp}°")
             views.setTextViewText(R.id.tv_vn_weather_desc, "${weatherLabel(vnWeather.code)} • Ẩm ${vnWeather.humidity}%")
             views.setInt(R.id.panel_vn, "setBackgroundResource", pickIosBackground(vnWeather.code, vnNow.hour))
+            views.setInt(R.id.panel_vn, "setAlpha", panelAlpha)
 
-            // Edmonton Panel
             val edmLunar = LunarCalendar.convertSolar2Lunar(edmNow.dayOfMonth, edmNow.monthValue, edmNow.year, 7.0)
             views.setTextViewText(R.id.tv_edm_offset, "$edmDayLabel • ${diffHours}g")
             views.setTextViewText(R.id.tv_edm_solar, formatSolarDate(edmNow))
@@ -140,12 +224,7 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.tv_edm_temp, "${weatherEmoji(edmWeather.code, edmNow.hour)} ${edmWeather.temp}°")
             views.setTextViewText(R.id.tv_edm_weather_desc, "${weatherLabel(edmWeather.code)} • Gió ${edmWeather.wind}km/h")
             views.setInt(R.id.panel_edm, "setBackgroundResource", pickIosBackground(edmWeather.code, edmNow.hour))
-
-            // Apply user transparency preference
-            val transparencyPct = getSavedTransparency(context)
-            // Higher transparencyPct => lower drawable alpha (from 255 down to 55)
-            val drawableAlpha = (255 - (transparencyPct * 1.9)).toInt().coerceIn(55, 255)
-            views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.bg_ios_glass_shell)
+            views.setInt(R.id.panel_edm, "setAlpha", panelAlpha)
 
             val intent = Intent(context, MainActivity::class.java)
             val pendingIntent = PendingIntent.getActivity(
@@ -204,19 +283,27 @@ class DualTimeWeatherWidget : AppWidgetProvider() {
             else -> "Ổn định"
         }
 
-        fun fetchWeather(lat: Double, lon: Double): WeatherInfo {
+        fun fetchWeather(lat: Double, lon: Double, fallback: WeatherInfo): WeatherInfo {
             return try {
-                val url = "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m"
-                val json = JSONObject(URL(url).readText())
+                val urlStr = "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto"
+                val conn = (URL(urlStr).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    requestMethod = "GET"
+                }
+                val text = conn.inputStream.bufferedReader().use { it.readText() }
+                conn.disconnect()
+                val json = JSONObject(text)
                 val current = json.getJSONObject("current")
                 WeatherInfo(
                     temp = Math.round(current.getDouble("temperature_2m")).toInt(),
                     code = current.getInt("weather_code"),
                     humidity = current.getInt("relative_humidity_2m"),
-                    wind = Math.round(current.getDouble("wind_speed_10m")).toInt()
+                    wind = Math.round(current.getDouble("wind_speed_10m")).toInt(),
+                    isLive = true
                 )
-            } catch (e: Exception) {
-                WeatherInfo(25, 0, 65, 10)
+            } catch (_: Exception) {
+                fallback.copy(isLive = false)
             }
         }
     }

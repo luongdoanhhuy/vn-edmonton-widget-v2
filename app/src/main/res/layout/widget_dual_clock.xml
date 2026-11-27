@@ -8,7 +8,6 @@
     android:padding="5dp"
     android:baselineAligned="false">
 
-    <!-- LEFT PANEL: VIETNAM (iOS Glass Card) -->
     <LinearLayout
         android:id="@+id/panel_vn"
         android:layout_width="0dp"
@@ -23,7 +22,6 @@
         android:paddingBottom="10dp"
         android:gravity="center_vertical">
 
-        <!-- Header: Location + Big iOS Temperature -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,10 +42,10 @@
                     android:textColor="#FFFFFF"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:shadowColor="#40000000"
+                    android:shadowColor="#66000000"
                     android:shadowDx="0"
                     android:shadowDy="1"
-                    android:shadowRadius="2"
+                    android:shadowRadius="3"
                     android:maxLines="1"
                     android:ellipsize="end" />
 
@@ -56,8 +54,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hôm nay • +14g"
-                    android:textColor="#CCFFFFFF"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="10sp"
+                    android:shadowColor="#55000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
                     android:maxLines="1"
                     android:ellipsize="end" />
             </LinearLayout>
@@ -66,17 +68,16 @@
                 android:id="@+id/tv_vn_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="☀️ 31°"
+                android:text="☀️ 29°"
                 android:fontFamily="sans-serif-light"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
-                android:shadowColor="#40000000"
+                android:shadowColor="#66000000"
                 android:shadowDx="0"
                 android:shadowDy="1"
                 android:shadowRadius="3" />
         </LinearLayout>
 
-        <!-- Hero iOS Clock -->
         <TextClock
             android:id="@+id/clock_vn"
             android:layout_width="wrap_content"
@@ -88,14 +89,13 @@
             android:textColor="#FFFFFF"
             android:textSize="34sp"
             android:letterSpacing="-0.03"
-            android:shadowColor="#4D000000"
+            android:shadowColor="#66000000"
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="4"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp" />
 
-        <!-- Solar Date -->
         <TextView
             android:id="@+id/tv_vn_solar"
             android:layout_width="match_parent"
@@ -103,14 +103,13 @@
             android:text="Thứ Sáu, 27/11/2026"
             android:textColor="#F2FFFFFF"
             android:textSize="11sp"
-            android:shadowColor="#40000000"
+            android:shadowColor="#55000000"
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="2"
             android:maxLines="1"
             android:ellipsize="end" />
 
-        <!-- iOS Translucent Pill for Lunar Calendar -->
         <TextView
             android:id="@+id/tv_vn_lunar"
             android:layout_width="wrap_content"
@@ -120,7 +119,7 @@
             android:paddingEnd="7dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:text="🌙 19/10 ÂL • Bính Ngọ"
+            android:text="🌙 18/10 ÂL • Bính Ngọ"
             android:textColor="#FFE57F"
             android:textSize="10sp"
             android:textStyle="bold"
@@ -128,20 +127,22 @@
             android:ellipsize="end"
             android:layout_marginTop="4dp" />
 
-        <!-- Weather Condition Footer -->
         <TextView
             android:id="@+id/tv_vn_weather_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nắng đẹp • Ẩm 68%"
-            android:textColor="#D9FFFFFF"
+            android:text="Đang đồng bộ..."
+            android:textColor="#E6FFFFFF"
             android:textSize="10sp"
+            android:shadowColor="#55000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:maxLines="1"
             android:ellipsize="end"
             android:layout_marginTop="4dp" />
     </LinearLayout>
 
-    <!-- RIGHT PANEL: EDMONTON, CANADA (iOS Glass Card) -->
     <LinearLayout
         android:id="@+id/panel_edm"
         android:layout_width="0dp"
@@ -156,7 +157,6 @@
         android:paddingBottom="10dp"
         android:gravity="center_vertical">
 
-        <!-- Header: Location + Big iOS Temperature -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -177,10 +177,10 @@
                     android:textColor="#FFFFFF"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:shadowColor="#40000000"
+                    android:shadowColor="#66000000"
                     android:shadowDx="0"
                     android:shadowDy="1"
-                    android:shadowRadius="2"
+                    android:shadowRadius="3"
                     android:maxLines="1"
                     android:ellipsize="end" />
 
@@ -188,9 +188,13 @@
                     android:id="@+id/tv_edm_offset"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Canada • -14g"
-                    android:textColor="#CCFFFFFF"
+                    android:text="Hôm nay • -14g"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="10sp"
+                    android:shadowColor="#55000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
                     android:maxLines="1"
                     android:ellipsize="end" />
             </LinearLayout>
@@ -203,13 +207,12 @@
                 android:fontFamily="sans-serif-light"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
-                android:shadowColor="#40000000"
+                android:shadowColor="#66000000"
                 android:shadowDx="0"
                 android:shadowDy="1"
                 android:shadowRadius="3" />
         </LinearLayout>
 
-        <!-- Hero iOS Clock -->
         <TextClock
             android:id="@+id/clock_edm"
             android:layout_width="wrap_content"
@@ -221,14 +224,13 @@
             android:textColor="#FFFFFF"
             android:textSize="34sp"
             android:letterSpacing="-0.03"
-            android:shadowColor="#4D000000"
+            android:shadowColor="#66000000"
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="4"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp" />
 
-        <!-- Solar Date -->
         <TextView
             android:id="@+id/tv_edm_solar"
             android:layout_width="match_parent"
@@ -236,14 +238,13 @@
             android:text="Thứ Năm, 26/11/2026"
             android:textColor="#F2FFFFFF"
             android:textSize="11sp"
-            android:shadowColor="#40000000"
+            android:shadowColor="#55000000"
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="2"
             android:maxLines="1"
             android:ellipsize="end" />
 
-        <!-- iOS Translucent Pill for Lunar Calendar -->
         <TextView
             android:id="@+id/tv_edm_lunar"
             android:layout_width="wrap_content"
@@ -253,7 +254,7 @@
             android:paddingEnd="7dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:text="🌙 18/10 ÂL • Bính Ngọ"
+            android:text="🌙 17/10 ÂL • Bính Ngọ"
             android:textColor="#FFE57F"
             android:textSize="10sp"
             android:textStyle="bold"
@@ -261,14 +262,17 @@
             android:ellipsize="end"
             android:layout_marginTop="4dp" />
 
-        <!-- Weather Condition Footer -->
         <TextView
             android:id="@+id/tv_edm_weather_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tuyết nhẹ • Gió 14km/h"
-            android:textColor="#D9FFFFFF"
+            android:text="Đang đồng bộ..."
+            android:textColor="#E6FFFFFF"
             android:textSize="10sp"
+            android:shadowColor="#55000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="2"
             android:maxLines="1"
             android:ellipsize="end"
             android:layout_marginTop="4dp" />

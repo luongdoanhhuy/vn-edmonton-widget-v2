@@ -11,8 +11,8 @@ android {
         applicationId = "com.huyluong.vnedmontonwidget"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "3.0-iOS-Glass"
+        versionCode = 4
+        versionName = "4.0-Fix-Glass-Weather"
     }
 
     buildTypes {

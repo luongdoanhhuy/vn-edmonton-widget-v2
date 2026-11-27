@@ -9,7 +9,7 @@
     android:targetCellWidth="4"
     android:targetCellHeight="2"
     android:resizeMode="horizontal|vertical"
-    android:updatePeriodMillis="1800000"
+    android:updatePeriodMillis="900000"
     android:initialLayout="@layout/widget_dual_clock"
     android:widgetCategory="home_screen"
     android:description="@string/widget_desc" />

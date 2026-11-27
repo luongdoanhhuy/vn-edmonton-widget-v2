@@ -17,29 +17,31 @@
             android:text="Việt Nam ⇄ Edmonton"
             android:fontFamily="sans-serif-light"
             android:textColor="#FFFFFF"
-            android:textSize="28sp" />
+            android:textSize="28sp"
+            android:shadowColor="#66000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="3" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Giao diện Kính Mờ iOS • Lịch Âm &amp; Dương • Thời tiết động"
-            android:textColor="#B3FFFFFF"
+            android:text="Giao diện Kính Mờ iOS • Lịch Âm &amp; Dương • Thời tiết trực tiếp"
+            android:textColor="#E6FFFFFF"
             android:textSize="13sp"
-            android:layout_marginBottom="18dp" />
+            android:layout_marginBottom="16dp" />
 
-        <!-- Live iOS Glass Widget Preview -->
         <include
             android:id="@+id/preview_widget"
             layout="@layout/widget_dual_clock"
             android:layout_width="match_parent"
             android:layout_height="205dp" />
 
-        <!-- Glass Opacity / Transparency Control Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@drawable/bg_ios_glass_shell"
+            android:background="@drawable/bg_control_card"
             android:orientation="vertical"
             android:padding="14dp">
 
@@ -61,8 +63,8 @@
                     android:id="@+id/tv_alpha_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="70% Trong suốt"
-                    android:textColor="#93C5FD"
+                    android:text="60% Trong suốt"
+                    android:textColor="#7DD3FC"
                     android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -71,16 +73,16 @@
                 android:id="@+id/seek_alpha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:max="100"
-                android:progress="70" />
+                android:progress="60" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Kéo sang phải để Widget xuyên thấu hình nền nhiều hơn; kéo sang trái để đậm màu dễ đọc."
-                android:textColor="#B3FFFFFF"
+                android:layout_marginTop="6dp"
+                android:text="Kéo để thay đổi độ mờ/trong suốt của cả bản xem trước lẫn Widget ngoài màn hình chính."
+                android:textColor="#CCFFFFFF"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -99,9 +101,19 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:text="🔄 Cập nhật Thời tiết &amp; Áp dụng độ trong suốt"
-            android:backgroundTint="#33FFFFFF"
+            android:text="🔄 Cập nhật Thời tiết &amp; Áp dụng ngay"
+            android:backgroundTint="#CC1E293B"
             android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/tv_sync_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Tự động cập nhật thời tiết mỗi 15 phút"
+            android:textColor="#E6FFFFFF"
+            android:textSize="12sp"
+            android:gravity="center" />
 
     </LinearLayout>
 </ScrollView>
