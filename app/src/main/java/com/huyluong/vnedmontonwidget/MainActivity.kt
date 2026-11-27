@@ -111,7 +111,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun renderData(vnW: DualTimeWeatherWidget.WeatherInfo, edmW: DualTimeWeatherWidget.WeatherInfo) {
+    private fun renderData(
+        vnW: DualTimeWeatherWidget.Companion.WeatherInfo,
+        edmW: DualTimeWeatherWidget.Companion.WeatherInfo
+    ) {
         try {
             val vnNow = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
             val edmNow = ZonedDateTime.now(ZoneId.of("America/Edmonton"))
