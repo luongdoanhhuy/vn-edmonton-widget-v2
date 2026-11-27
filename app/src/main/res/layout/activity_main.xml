@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0F19"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Việt Nam ⇄ Edmonton"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đồng hồ kép • Lịch Âm &amp; Dương • Thời tiết tự động"
+        android:textColor="#94A3B8"
+        android:textSize="13sp"
+        android:layout_marginBottom="16dp" />
+
+    <include
+        android:id="@+id/preview_widget"
+        layout="@layout/widget_dual_clock"
+        android:layout_width="match_parent"
+        android:layout_height="220dp" />
+
+    <Button
+        android:id="@+id/btn_pin_widget"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="20dp"
+        android:text="➕ Thêm Widget ra Màn Hình Chính"
+        android:textStyle="bold"
+        android:backgroundTint="#2563EB"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/btn_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="10dp"
+        android:text="🔄 Cập nhật Thời tiết &amp; Lịch ngay"
+        android:backgroundTint="#1E293B"
+        android:textColor="#E2E8F0" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Mẹo: Sau khi thêm Widget ra màn hình chính, nhấn giữ vào Widget để kéo thay đổi kích thước ngang/dọc tùy ý."
+        android:textColor="#64748B"
+        android:textSize="12sp" />
+</LinearLayout>

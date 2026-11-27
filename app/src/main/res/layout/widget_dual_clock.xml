@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget_shell"
+    android:orientation="horizontal"
+    android:padding="6dp"
+    android:baselineAligned="false">
+
+    <!-- LEFT PANEL: VIETNAM -->
+    <LinearLayout
+        android:id="@+id/panel_vn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginEnd="3dp"
+        android:background="@drawable/bg_day_clear"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_vn_city"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🇻🇳 VIỆT NAM"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tv_vn_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="☀️ 31°C"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextClock
+            android:id="@+id/clock_vn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format24Hour="HH:mm"
+            android:format12Hour="hh:mm a"
+            android:timeZone="Asia/Ho_Chi_Minh"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/tv_vn_solar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thứ Sáu, 27/11/2026"
+            android:textColor="#E6FFFFFF"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_vn_lunar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🌙 19/10 ÂL (Bính Ngọ)"
+            android:textColor="#FFE082"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/tv_vn_weather_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trời nắng • Độ ẩm 70%"
+            android:textColor="#CCFFFFFF"
+            android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    <!-- RIGHT PANEL: EDMONTON, CANADA -->
+    <LinearLayout
+        android:id="@+id/panel_edm"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginStart="3dp"
+        android:background="@drawable/bg_night_clear"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_edm_city"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="🇨🇦 EDMONTON"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tv_edm_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="❄️ -6°C"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextClock
+            android:id="@+id/clock_edm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format24Hour="HH:mm"
+            android:format12Hour="hh:mm a"
+            android:timeZone="America/Edmonton"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/tv_edm_solar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thứ Năm, 26/11/2026"
+            android:textColor="#E6FFFFFF"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_edm_lunar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🌙 18/10 ÂL (Bính Ngọ)"
+            android:textColor="#FFE082"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/tv_edm_weather_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tuyết nhẹ • Gió 14 km/h"
+            android:textColor="#CCFFFFFF"
+            android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+</LinearLayout>
